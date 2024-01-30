@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:custom-metrics="http://www.mulesoft.org/schema/mule/custom-metrics"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/custom-metrics http://www.mulesoft.org/schema/mule/custom-metrics/current/mule-custom-metrics.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="invoice-header-import-flow" doc:id="3039b2b5-3622-42fb-ad8e-18f03eb33f1e" >
+		<json-logger:logger doc:name="Entry Logger" doc:id="b0bfec47-09cb-4e8f-9cd7-0a08f2ece5fd" config-ref="JSON_Logger_Config_invoicePortal" message='#["Enter Header Import Flow"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<http:request method="GET" doc:name="Get total invoice count" doc:id="fc9e7ca8-c751-48b2-845a-6e7015ab566f" config-ref="Portal-Invoice-SAPI" path="/transactions/count"/>
+		<ee:transform doc:name="Transform Message" doc:id="918f9923-5dee-40fc-b2c3-bb52f2bdb824" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var payloadT = payload.totalRecords as Number
+var invoiceT = "${invoiceBatch.totalRecordsInv}" as Number
+---
+	if(payloadT > invoiceT)
+	"${invoiceBatch.totalRecordsInv}" as Number
+	else 
+	payloadT]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="d780a624-1b7b-4b49-90d4-88cc6b56d280" config-ref="JSON_Logger_Config_invoicePortal" message='#["Total record count: " ++ payload]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;[{}]]" doc:name="newPayload" doc:id="3ca48af4-2d4f-455c-a70e-fc83f50a8b39" variableName="sqlOutput" />
+		<set-variable value="#[payload]" doc:name="Invoice Header Total Count" doc:id="b55e69c5-5bd5-4931-8f25-15f665a8f765" variableName="totalRecords"/>
+		<set-variable value="5000" doc:name="Batch Limit" doc:id="179f27d5-3d2a-48ef-b4a3-8694f1781153" variableName="limit"/>
+		<ee:transform doc:name="Transform Message" doc:id="70102217-6f21-4fe2-a4ba-32a49e326a3b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var limit = vars.limit as Number
+var rowCount = vars.totalRecords
+var maxSize = ceil(rowCount/limit) -1
+---
+if(rowCount >= limit)  
+    0 to maxSize map { offset: $ * limit, limit: limit}
+else
+    [{ offset: 0,  limit: limit }]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="9b866d61-3334-4f6e-8373-89a2159d2445" collection="payload">
+			<set-variable value="#[payload.offset]" doc:name="offset" doc:id="80354e64-1244-412a-93de-a2f42d5c1cba" variableName="offset"/>
+			<set-variable value="#[payload.limit]" doc:name="fetch" doc:id="c664f16a-c707-4604-8d0d-9afb7d30d49e" variableName="fetch"/>
+			<http:request method="GET" doc:name="get invoice lines" doc:id="134d7bf3-178b-4832-bea0-20bacf295ca3" config-ref="Portal-Invoice-SAPI" path="/transactions" sendCorrelationId="ALWAYS" >
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"offset" : vars.offset,
+	"fetch" : vars.fetch
+}]]]></http:query-params>
+			</http:request>
+			<json-logger:logger doc:name="Logger1" doc:id="740b018c-c498-47e4-9dc2-79cdd5298cf8" config-ref="JSON_Logger_Config_invoicePortal" message='#["Before filter out account codes"]'>
+				<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    offset:vars.offset,
+    limit:vars.fetch
+}]]]></json-logger:content>
+			</json-logger:logger>
+			<ee:transform doc:name="Strip Bad Charecters" doc:id="d47e66a3-ed76-4bbf-a88d-59ff75b146d7" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="accountcleaned" ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (value) ->{
+cuCode: value.cuCode replace "'" with "\'"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<ee:transform doc:name="Get account codes" doc:id="257ab290-d099-4020-8bdd-711c8b75bc5c" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="accountCodes" ><![CDATA[%dw 2.0
+output application/json
+---
+((vars.accountcleaned.cuCode distinctBy (value) -> {"unique" : value}) reduce ((item,acc = "(") -> acc ++ "'" ++ item ++ "',") ++ ")")replace ",)" with ")"]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<json-logger:logger doc:name="Logger" doc:id="b11b9179-9b28-425e-a042-0053390b4619" config-ref="JSON_Logger_Config_invoicePortal" message='#["CU Codes before merge"]'>
+				<json-logger:content ><![CDATA[#[vars.accountCodes]]]></json-logger:content>
+			</json-logger:logger>
+			<salesforce:query doc:name="Get Account Id's" doc:id="295d6373-b943-4115-8978-c5ba6cfe6f1e" config-ref="Salesforce_Config" target="accountIdsPayload">
+				<ee:repeatable-file-store-iterable inMemoryObjects="1000" />
+				<salesforce:salesforce-query ><![CDATA[select id, AccountNumber from account where accountnumber in :cuCode]]></salesforce:salesforce-query>
+				<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	cuCode : vars.accountCodes
+}]]]></salesforce:parameters>
+			</salesforce:query>
+			<json-logger:logger doc:name="Logger" doc:id="5b35178d-1423-4e49-8e52-84fe4506a1f4" config-ref="JSON_Logger_Config_invoicePortal" message="#[&quot;Returned ID's&quot;]"/>
+			<ee:transform doc:name="Add Account ID's" doc:id="01c1c892-b24e-43e1-8ea7-dbd31987e42f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+import toBoolean from dw::util::Coercions
+
+output application/json	
+---
+payload map (item) ->{
+	External_Id__c: item.Id as String,
+	EntityId__c: item.entityId,
+	CUCode__c: item.cuCode,
+  	Description__c: item.description,
+  	CurrencyIsoCode: item.currencyCode,
+  	Name: item.headerRef,
+  	Invoice_Date__c: item.date as Date,
+  	Unallocated_Value__c: item.unallocated,
+  	Database_Primary__c: item.primary,
+  	Nett__c: item.nett,
+  	Vat__c: item.vat,
+  	Gross__c: item.gross,
+  	Currency_Nett__c: item.currNett,
+	Currency_VAT__c: item.currVat,
+ 	Currency_Gross__c: item.currGross,
+	Due_Date__c: item.dueDate as Date,
+  	Transaction_Type__c: item.tranType,
+  	Query_Flag__c: item.queryFlag == 1,
+  	Document_Generated_Status__c: item.documentGeneratedStatus == 1,
+  	(vars.accountIdsPayload filter ($.*AccountNumber contains item.cuCode) map (secondInputValue) -> {
+    Account__c : secondInputValue.Id
+    })
+  	}
+	
+	]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<ee:transform doc:name="No Account Number" doc:id="4f96996e-2911-4c87-aca0-8a0c597eefc6" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="missingAccNum" ><![CDATA[%dw 2.0
+output application/java
+---
+payload filter((value) -> value.Account__c == null)]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<choice doc:name="Choice" doc:id="29656ec5-e514-4467-b600-a2c5200099ce" >
+				<when expression="#[sizeOf(vars.missingAccNum default []) &gt; 0]">
+					<flow-ref doc:name="Flow Reference" doc:id="aaff6615-c94d-49bc-be12-640ed5b9f9af" name="invoice-header-import_error_hospital" targetValue="#[vars.missingAccNum]"/>
+				</when>
+			</choice>
+			<ee:transform doc:name="Get payload with only AccountNumbers" doc:id="e47814b9-f10e-4125-a335-d3a4c6d52605">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value) -> value.Account__c != null)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<ee:transform doc:name="Format for SFDC" doc:id="3e635541-c6fc-4eb8-aa27-d26756e8f7d9">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+import toBoolean from dw::util::Coercions
+
+output application/csv quoteValues=true,header=true,separator=",",escape='"' 
+---
+	payload map (item) ->{
+	External_Id__c: item.External_Id__c as String,
+	EntityId__c: item.EntityId__c,
+	CUCode__c: item.CUCode__c,
+  	Description__c: item.Description__c,
+  	CurrencyIsoCode: item.CurrencyIsoCode,
+  	Name: item.Name,
+  	Invoice_Date__c: item.Invoice_Date__c as Date,
+  	Unallocated_Value__c: item.Unallocated_Value__c,
+  	Database_Primary__c: item.Database_Primary__c,
+  	Nett__c: item.Nett__c,
+  	Vat__c: item.Vat__c,
+  	Gross__c: item.Gross__c,
+  	Currency_Nett__c: item.Currency_Nett__c,
+	Currency_VAT__c: item.Currency_VAT__c,
+ 	Currency_Gross__c: item.Currency_Gross__c,
+	Due_Date__c: item.Due_Date__c as Date,
+  	Transaction_Type__c: item.Transaction_Type__c,
+  	Query_Flag__c: item.Query_Flag__c == 1,
+  	Document_Generated_Status__c: item.Document_Generated_Status__c == 1,
+    Account__c : item.Account__c
+  	}
+	
+	]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+			<salesforce:create-job-bulk-api-v2 doc:name="Create upsert bulk job" doc:id="89383bbc-376f-4126-992e-37cd9b52ba86" config-ref="Salesforce_Config" objectType="Invoice_Header__c" operation="upsert" externalIdFieldName="External_Id__c"/>
+			<until-successful maxRetries="30" doc:name="Until Successful" doc:id="ea9f7945-2fb3-4f7b-a8f9-10697f9de2f8" millisBetweenRetries="30000">
+				<salesforce:get-job-state-bulk-api-v2 doc:name="Get job state bulk api v " doc:id="5e0887da-ba70-4697-b465-509da17a09a7" config-ref="Salesforce_Config" id="#[payload.id]" />
+				<choice doc:name="Choice" doc:id="3a1d1994-cf9d-4ad3-940b-d9ed335e314e">
+				<when expression="#[payload.state == 'JobComplete']">
+						<salesforce:retrieve-job-successful-results-bulk-v2 doc:name="Retrieve job successful results bulk v 2" doc:id="51e23082-1ef6-4866-98bc-765646e28df5" config-ref="Salesforce_Config" id="#[payload.Id]" />
+						<json-logger:logger doc:name="Logger" doc:id="2b5f329a-53c9-4376-805f-4c843e42ae3a" config-ref="JSON_Logger_Config_invoicePortal" message='#["before transform"]'>
+							<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+						</json-logger:logger>
+						<ee:transform doc:name="Transform Message" doc:id="57dad2a6-1d66-4aa0-8e85-6d8d1b885cf2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+	payload map (item) ->{
+	Id : item.originalFields.External_Id__c as Number
+  	}
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+						<set-variable value="#[vars.sqlOutput ++ payload]" doc:name="Set Variable SqlOut" doc:id="664c7837-ee48-44e7-b8f6-d10c62934b60" variableName="sqlOutput" />
+						<json-logger:logger doc:name="Logger" doc:id="ecf4991f-814e-4b80-9861-3bc29383c319" config-ref="JSON_Logger_Config_invoicePortal" message='#["Job Finished with success"]'>
+							<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+						</json-logger:logger>
+				</when>
+				<when expression="payload.state == 'Failed'">
+						<salesforce:retrieve-job-successful-results-bulk-v2 doc:name="Retrieve job successful results bulk v " doc:id="dddd5e65-09fc-4b15-a976-84f11580d0c5" config-ref="Salesforce_Config" id="#[payload.Id]" />
+						<ee:transform doc:name="Transform Message" doc:id="a3e8a881-ceb9-40f6-b30b-6bb2daabf680">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+	payload map (item) ->{
+	Id : item.originalFields.External_Id__c as Number
+  	}
+	]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<set-variable value="#[vars.sqlOutput ++ payload]" doc:name="Set Variable SqlOut" doc:id="76d08327-6d25-4dac-ae12-f836803f58d2" variableName="sqlOutput" />
+						<json-logger:logger doc:name="Logger" doc:id="81d72827-f164-42a5-9f79-5d4765b14cf2" config-ref="JSON_Logger_Config_invoicePortal" message='#["Job Finished with Failed "]'>
+							<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+ 
+}]]]></json-logger:content>
+						</json-logger:logger>
+				</when>
+				<otherwise>
+					<json-logger:logger doc:name="Logger" doc:id="91abe733-15b4-4c58-be52-898202b83aa8" config-ref="JSON_Logger_Config_invoicePortal" message='#["Job Still Runnning " ++ payload.Id]'>
+							<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+						</json-logger:logger>
+						<raise-error doc:name="Raise error" doc:id="769b9427-6fc4-4f08-9938-f94375fdf5a5" type="CUSTOM:CUSTOM_ERROR" description="Not Ready" />
+				</otherwise>
+			</choice>
+			</until-successful>
+			<json-logger:logger doc:name="End of For Loop" doc:id="cee6140a-1549-4de3-b3bc-11c1d058e303" config-ref="JSON_Logger_Config_invoicePortal" message='#["End Of For Loop"]'>
+				<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+			</json-logger:logger>
+		</foreach>
+		<ee:transform doc:name="Create SQL Update Payload" doc:id="77e8fee4-54b5-48ce-951e-4c350469abca">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.sqlOutput filter ($ != {})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="d597ab3e-7942-4170-b426-b8a2539dbbb6" collection="payload" batchSize="2000">
+			<json-logger:logger doc:name="Logger" doc:id="845759e9-b998-4974-ad6f-050e9532aebb" config-ref="JSON_Logger_Config_invoicePortal" message='#["Enter For Each Sql Update"]'>
+				<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+			</json-logger:logger>
+			<ee:transform doc:name="Map batched payload" doc:id="3cc2704d-97ec-4ff9-987d-276e04ec7a70">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item) ->{
+	Id: item.Id as Number
+	}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<try doc:name="Try" doc:id="a07ea0ed-8389-4ccd-99de-e6d5cf2dd5d8">
+				<json-logger:logger doc:name="Logger" doc:id="bde822b9-6a16-4eff-83bf-f0fc729d44eb" config-ref="JSON_Logger_Config_invoicePortal" message='#["Try Update SQL"]'>
+					<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+				</json-logger:logger>
+				<until-successful maxRetries="5" doc:name="Until Successful" doc:id="8c31d91f-a263-483e-afb9-13861ef79c09">
+				<http:request method="PATCH" doc:name="Request" doc:id="9afd78ad-7e13-4461-bd9c-5cb3ed0870dc" config-ref="Portal-Invoice-SAPI" path="/transactions" responseTimeout="240000">
+						<reconnect-forever />
+					</http:request>
+			</until-successful>
+				<error-handler>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="be3a8987-2e09-4ded-aba5-354380e245fe">
+						<json-logger:logger doc:name="Error Logger" doc:id="d5819f65-1b58-4ec0-a2e3-d46357cf4ee4" config-ref="JSON_Logger_Config_invoicePortal" message='#["Update SQL Failed"]' >
+							<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+						</json-logger:logger>
+					</on-error-continue>
+				</error-handler>
+			</try>
+			<json-logger:logger doc:name="Logger" doc:id="f1a5b65d-3296-4b7e-910a-d6bd903954b2" config-ref="JSON_Logger_Config_invoicePortal" message='#["End for each"]'>
+				<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+			</json-logger:logger>
+		</foreach>
+		<json-logger:logger doc:name="Exit Logger" doc:id="86303e12-8f06-4981-ade0-ec903578b514" config-ref="JSON_Logger_Config_invoicePortal" message='#["Exit Header Import Flow"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<sub-flow name="invoice-header-import_error_hospital" doc:id="195f77bb-1c9b-4d72-a0f5-1b45af61980f" >
+		<json-logger:logger doc:name="Logger" doc:id="9917d7c2-67ee-42f6-8413-05b8d74a1c85" config-ref="JSON_Logger_Config_invoicePortal" message='#["Before Foreach Errors"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<foreach doc:name="For Each" doc:id="a19a0ef9-c815-45ff-8fcf-f9bef5304b95" collection="#[payload]" batchSize="200">
+			<ee:transform doc:name="Create Hospital Payload" doc:id="a0235c9c-7797-4fc8-a8b5-3177785119d5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item) ->{
+  dataFlow: "Invoice Header Import",
+  errorText: "Account Code Missing",
+  errorDetails: "Account Code in Payload not found in Salesforce",
+  payload: write(item,'application/json'),
+  retryCount: 0,
+  retryFlag: false,
+  sourceSystem: "THSSQL227",
+  status: "Data Failure",
+  targetSystem: "Salesforce"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="b81f7630-b8d8-44d6-8e22-e0bfc1fca5d6" >
+				<http:request method="POST" doc:name="Create Error Records" doc:id="2ee0f421-97c8-4011-bd28-4629d51d1e68" config-ref="HTTP_Request_Error_Hosptial" path="/errors" responseTimeout="120000" />
+			</until-successful>
+		</foreach>
+		<json-logger:logger doc:name="Logger" doc:id="f1599c35-3fb3-42af-adbf-d7b275bfc9d8" config-ref="JSON_Logger_Config_invoicePortal" message='#["After Foreach Errors"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	
+</mule>

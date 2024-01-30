@@ -1,0 +1,6 @@
+#variable billing properties
+accessGroup.alertnotification:
+  api:
+    clientId: "![]"
+    clientSecret: "![]"
+  

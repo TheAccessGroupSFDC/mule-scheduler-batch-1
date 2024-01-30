@@ -1,0 +1,18 @@
+#variable billing properties
+accessGroup.alertnotification:
+  api:
+    clientId: "![]"
+    clientSecret: "![]"
+    
+    
+#invoice-portal-properties   
+    
+    
+salesforceconfig:
+  consumer:      "![aV+5d6tCJhIxZzPEjUUWnFZKRbVUbr7wztvPN4dFrxfga5LEidBoRGV41Swj47QsBNL8Hl6Mn4sJKPYttwj4i7omt2Q8PvAXHBuk49kXg30GQ9C4eSxWqT/Mn9Gzf4wX]"
+  storePassword: "![KhD2i23UUKun30AS0Zwxgs2mxIKyQeo6n628Zi4rpSE=]"
+  princable:     "![Uc4Jl72ZqnrbXrHW+GeorgExpWUFSFUpDJ0VoPCxHO0wwdGn52JE9RRlYES3oyOq]"
+    
+httpconfig:
+  clientId: "![Axjlv08BPTrn4Fgrl1tIN0HjFijErAmaR1uZ9As8qY1rR1hEAtzBr/G7mSxyaaz3]"
+  clientSecret: "![NtRPDcSYW+F0tySiITkVxpSOzyrYwjweq6QCMN0EtVtKpK9W4OH/Ti0VkCgKNy3D]"

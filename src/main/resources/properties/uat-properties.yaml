@@ -1,0 +1,44 @@
+#variable billing properties
+api:
+  autodiscovery:
+    id: "18643018"
+  
+json.logger:
+  disabledFields: ""
+
+tls.keystore:
+  type:         "jks"
+  path:         "keystore/keystore.jks"
+  alias:        "mule"
+  password:     "password"
+  keyPassword:  "password"
+  
+sqlconfig:
+  #host:         "sqlLive.access-accounts.com"
+   host:         "10.48.214.139"
+  
+httprequest:
+  host:         "salesforce-service-contract-papi-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
+  #host:         "service-contracts-papi-uat-k7qmu8.pa977o.gbr-e1.cloudhub.io"
+  
+  
+#invoice-portal-properties   
+
+http.config:
+  responseTimeout: "20000"
+  retryCount: "5"
+  host: "invoice-portal-sapi-uat-k7qmu8.internal-pa977o.gbr-e1.cloudhub.io"
+  errhosp: "error-hospital-sapi-uat-k7qmu8.internal-pa977o.gbr-e1.cloudhub.io"
+  
+  
+salesforceconfig:
+  keyStore:      "${mule.home}/apps/${app.name}/jks/uat/00D7E000000AmQn.jks"
+  certalias:     "mulesoft"
+  tokenEndpoint: "test"
+  reconFreq: "2000"
+  reconAtt: "3"
+  
+invoiceBatch:
+  limit: "2500"
+  totalRecordsDocs: "500"
+  totalRecordsInv: "10000"

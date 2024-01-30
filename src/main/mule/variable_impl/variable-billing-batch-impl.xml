@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+		<flow name="variable-billing-batch-imp" doc:id="8190076b-f716-4ba6-986a-431d885ae531" >
+		<json-logger:logger doc:name="Before Stored Proc" doc:id="998eff93-0bb2-459a-a229-b27c9fc195bd" config-ref="JSON_Logger_Config_variableBilling" message='#["Before Stored Procedure Run Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+ 
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="variable-billing-batch-storedProcedure" doc:id="640e49fc-f532-4523-91b7-73eea85c7cf5" name="variable-billing-batch-storedProcedure" />
+		<json-logger:logger doc:name="After Stored Proc" doc:id="f5460d04-5a5e-4a65-95a4-dae09ba23ca7" config-ref="JSON_Logger_Config_variableBilling" message='#["After Stored Procedure Run Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Before Service Contracts" doc:id="0829a367-4b5f-4ef2-ad32-05783a3bced4" config-ref="JSON_Logger_Config_variableBilling" message='#["Before Variable Service Contracts Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="variable-billing-batch-ServiceContracts" doc:id="cffc4d94-d1aa-4a13-9317-53137d3ae9b6" name="variable-billing-batch-servicecontractsSub_Flow" />
+		<json-logger:logger doc:name="After Service Contracts" doc:id="550c366c-483a-4abe-87d7-1a96087544ac" config-ref="JSON_Logger_Config_variableBilling" message='#["After Variable Service Contracts Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<json-logger:logger doc:name="Before Service Contract Lines" doc:id="4d871ce7-7ede-4252-acc8-8a206674626b" config-ref="JSON_Logger_Config_variableBilling" message='#["Before Variable Service Contract Lines Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="variable-billing-batch-Service-Contracts-Lines" doc:id="a14405eb-d59b-4139-b93d-c7d233a3304f" name="variable-billing-batch-service-contract-linesSub_Flow" />
+		<json-logger:logger doc:name="After Service Contract Lines" doc:id="12e871a0-ef61-4834-a137-fd6c8e359ca7" config-ref="JSON_Logger_Config_variableBilling" message='#["After Variable Service Contract Lines Flow"]' tracePoint="END">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<flow name="variable-billing-batch-storedProcedure" doc:id="e430614f-3491-4c86-a9f9-8513649e2936" >
+		<json-logger:logger doc:name="Before Stored Procedure Run" doc:id="ab5139be-11db-471d-934c-75deafc8d4ba" message='#["Before Stored Procedure Run"]' config-ref="JSON_Logger_Config_variableBilling">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:stored-procedure doc:name="Stored procedure SFDC_Merge_Entitelments" doc:id="0a46d0eb-48cd-4f4c-940b-40c720f909ab" config-ref="SQL_Service_Salesforce">
+			<db:sql><![CDATA[{call SFDC_Merge_Entitelments()}]]></db:sql>
+		</db:stored-procedure>
+		<json-logger:logger doc:name="After Stored Procedure Run" doc:id="9d0bcdc7-11d2-40a9-bf9f-f58b2954d405" config-ref="JSON_Logger_Config_variableBilling" message='#["After Stored Procedure Run"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+<!-- [STUDIO:"variable-billing-batch-ServiceContracts"]	<flow name="variable-billing-batch-ServiceContracts" doc:id="bae53150-4e52-4ca9-a6b7-a72ada63a744" >
+		<json-logger:logger doc:name="Logger1" doc:id="802ddb09-7d11-40ff-b403-b5b48bf674ce" config-ref="JSON_Logger_Config" message='#["Before SQL Query"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json &#45;&#45;-
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:select doc:name="Get Service Contract Records" doc:id="1dbc5aa9-ad5b-4a03-ad49-54d7e4cbdde1" config-ref="SQL_Service_Salesforce">
+			<db:sql ><![CDATA[SELECT Contract_Name,AccountId,CAST(Start_Date AS DATE) Start_Date,CAST(End_Date AS DATE) End_Date,Integration_Id
+from AccessServiceContracts_LOcal
+where Type = 'CV'
+and (ToUpload = 1 or Deleted = 1)]]></db:sql>
+		</db:select>
+		<foreach doc:name="For Each" doc:id="95379ae9-70d3-4453-96a0-785c1851cdd1" collection="payload" batchSize="200">
+			<ee:transform doc:name="Transform Message" doc:id="0371ad78-298a-4824-b4c5-d824c0a8f343" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+&#45;&#45;-
+payload map (varPayload) ->{
+  endDate: varPayload.End_Date as Date,
+  accountId: varPayload.AccountId,
+  integrationId: varPayload.Integration_Id,
+  name: varPayload.Contract_Name,
+  startDate: varPayload.Start_Date as Date
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="PATCH" doc:name="Request" doc:id="8e1b384a-934b-4063-81dc-70f330c063fc" config-ref="HTTP_Request_configuration" path="/service-contracts">
+				<http:headers><![CDATA[#[output application/json
+&#45;&#45;-
+{
+	"x-source-system" : "VarDB",
+	client_secret : "F17542e62BF34fd0A439195C6BB7Ab01",
+	client_id : "7c8a133283e64bd592c09814ab4b553f"
+}]]]></http:headers>
+			</http:request>
+		</foreach>
+		<json-logger:logger doc:name="Logger2" doc:id="5c4260d7-fbf7-417e-a79d-0b75e8a7fe62" config-ref="JSON_Logger_Config" message='#["After SQL Query"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json &#45;&#45;-
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow> [STUDIO] -->
+<!-- [STUDIO:"variable-billing-batch-Service-Contract-lines"]	<flow name="variable-billing-batch-Service-Contract-lines" doc:id="b75e2dab-74da-413c-8705-7ac784cfd76f" >
+		<json-logger:logger doc:name="Logger" doc:id="96f5a950-9b46-4773-bb22-6cb75abfc217" config-ref="JSON_Logger_Config" message='#["Before SQL Query"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json &#45;&#45;-
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:select doc:name="Get Service Contract Lines Records" doc:id="86a20053-02ab-4b53-9d0d-f5b92e5f360a" config-ref="SQL_Service_Salesforce" >
+			<db:sql ><![CDATA[SELECT *
+from salesforce.dbo.AccessServiceContracts_LOcal
+where Type = 'VCL'
+and (ToUpload = 1 or Deleted = 1)]]></db:sql>
+		</db:select>
+		<foreach doc:name="For Each" doc:id="d68bd79e-5af7-4cd7-90ca-7787df44a182" collection="payload" batchSize="200" >
+			<ee:transform doc:name="Transform Message" doc:id="2dabda5c-6da8-4784-a909-9b249685fdf0" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+&#45;&#45;-
+payload map (VarPayloadValue) ->
+  {
+  	name: VarPayloadValue.Product_Name,  
+  	startDate: VarPayloadValue.Start_Date as Date, 
+  	endDate: VarPayloadValue.End_Date as Date, 
+  	status: VarPayloadValue.Status,
+  	serviceContract: VarPayloadValue.Integration_Id replace ("-" ++ VarPayloadValue.Product_Number as Number) with '',
+    productNameNominal: VarPayloadValue.Product_Name,
+    stockName : VarPayloadValue.Stock_Name,
+    stockCode : VarPayloadValue.Stock_Code,
+    productNumber: VarPayloadValue.Product_Number as Number,
+    planType: VarPayloadValue.Plan_Type,
+    planProductNumber: VarPayloadValue.Plan_Product_Number as String,
+    planLevel: VarPayloadValue.Plan_Level,
+    integrationID: VarPayloadValue.Integration_Id
+     }]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="PATCH" doc:name="Request" doc:id="c5e059d9-c82b-49ad-82b2-5aa5e00ba2a1" config-ref="HTTP_Request_configuration" path="/service-contract-lines" >
+				<http:headers ><![CDATA[#[output application/json
+&#45;&#45;-
+{
+	"x-source-system" : "VarDB",
+	client_secret : "F17542e62BF34fd0A439195C6BB7Ab01",
+	client_id : "7c8a133283e64bd592c09814ab4b553f"
+}]]]></http:headers>
+			</http:request>
+		</foreach>
+		<json-logger:logger doc:name="Logger1" doc:id="2d872fbd-9d99-466d-aced-e37ec6fd9d62" config-ref="JSON_Logger_Config" message='#["After SQL Query"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json &#45;&#45;-
+{
+ 
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow> [STUDIO] -->
+		<sub-flow name="variable-billing-batch-service-contract-linesSub_Flow" doc:id="1549f17f-f712-4b4e-8f80-8583cd9bbc58" >
+		<json-logger:logger doc:name="Logger" doc:id="d5e24377-f83f-41cc-a6b5-6ce09d803b4c" config-ref="JSON_Logger_Config_variableBilling" message='#["Before SQL Query Lines"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:select doc:name="Get Service Contract Lines Records" doc:id="945ff0c3-ccec-43b9-9c07-fcb86a319d34" config-ref="SQL_Service_Salesforce" >
+			<db:sql ><![CDATA[SELECT *
+from salesforce.dbo.AccessServiceContracts_LOcal
+where Type = 'VCL'
+and (ToUpload = 1 or Deleted = 1)]]></db:sql>
+		</db:select>
+		<foreach doc:name="For Each" doc:id="fd1ce75e-5596-4811-b7ff-d5187d67a6fe" collection="payload" batchSize="200" >
+<!-- [STUDIO:"Transform Message"]			<ee:transform doc:name="Transform Message" doc:id="f885a588-48bb-4151-99dc-ef781a343935" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+&#45;&#45;-
+payload map (VarPayloadValue) ->
+  {
+  	name: VarPayloadValue.Product_Name,  
+  	startDate: VarPayloadValue.Start_Date as Date, 
+  	endDate: VarPayloadValue.End_Date as Date, 
+  	status: VarPayloadValue.Status,
+  	serviceContract: VarPayloadValue.Integration_Id replace ("-" ++ VarPayloadValue.Product_Number as Number) with '',
+    productNameNominal: VarPayloadValue.Product_Name,
+    stockName : VarPayloadValue.Stock_Name,
+    stockCode : VarPayloadValue.Stock_Code,
+    productNumber: VarPayloadValue.Product_Number as Number,
+    planType: VarPayloadValue.Plan_Type,
+    planProductNumber: VarPayloadValue.Plan_Product_Number as String,
+    planLevel: VarPayloadValue.Plan_Level,
+    integrationID: VarPayloadValue.Integration_Id
+     }]]></ee:set-payload>
+				</ee:message>
+			</ee:transform> [STUDIO] -->
+			<ee:transform doc:name="Transform Message" doc:id="d37f32de-f698-481c-ad7a-b30c061a1b01">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload map (VarPayloadValue) ->
+  {
+  	name: VarPayloadValue.Product_Name,  
+  	startDate: VarPayloadValue.Start_Date as Date, 
+  	endDate: VarPayloadValue.End_Date as Date, 
+  	status: VarPayloadValue.Status,
+  	serviceContract: VarPayloadValue.Integration_Id replace ("-" ++ VarPayloadValue.Product_Number as Number) with '',
+    productNameNominal: VarPayloadValue.Product_Name,
+    stockName : VarPayloadValue.Stock_Name,
+    stockCode : VarPayloadValue.Stock_Code,
+    productNumber: VarPayloadValue.Product_Number as Number,
+    planType: VarPayloadValue.Plan_Type,
+    planProductNumber: VarPayloadValue.Plan_Product_Number as String,
+    planLevel: VarPayloadValue.Plan_Level,
+    integrationID: VarPayloadValue.Integration_Id
+     }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="cbc4a748-7d1f-421c-8c5e-679bd18a174e" >
+				<try doc:name="Try" doc:id="1d0e6a56-7b3c-4661-8dd2-1c7c1eef2672" >
+					<http:request method="PATCH" doc:name="Request" doc:id="5a5bcd09-f9fa-4cf1-bf62-b650e616344c" config-ref="HTTP_Request_configuration" path="/service-contract-lines">
+			</http:request>
+				</try>
+			</until-successful>
+		</foreach>
+<!-- [STUDIO:"Request"]		<http:request method="PATCH" doc:name="Request" doc:id="91814afd-c392-41dc-b5bb-143823921584" config-ref="HTTP_Request_configuration" path="/service-contract-lines" >
+			<http:headers ><![CDATA[#[output application/json
+&#45;&#45;-
+{
+	"x-source-system" : "VarDB",
+	client_secret : "F17542e62BF34fd0A439195C6BB7Ab01",
+	client_id : "7c8a133283e64bd592c09814ab4b553f"
+}]]]></http:headers>
+		</http:request> [STUDIO] -->
+		<json-logger:logger doc:name="Logger1" doc:id="71700d44-f051-4bb8-89f2-2605524b086a" config-ref="JSON_Logger_Config_variableBilling" message='"After SQL Query Lines"'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+ 
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+		<sub-flow name="variable-billing-batch-servicecontractsSub_Flow" doc:id="c7e7b9a2-607a-4ef8-88d1-b655d5e25072" >
+		<json-logger:logger doc:name="Logger" doc:id="5799ac00-bf1a-475f-ae4e-2016fb161da2" config-ref="JSON_Logger_Config_variableBilling" message='#["Before SQL Query Contracts"]'>
+			<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:select doc:name="Get Service Contract Records" doc:id="1c116913-2247-4936-85dc-2e97e61f68fa" config-ref="SQL_Service_Salesforce">
+			<db:sql><![CDATA[SELECT Contract_Name,AccountId,CAST(Start_Date AS DATE) Start_Date,CAST(End_Date AS DATE) End_Date,Integration_Id
+from AccessServiceContracts_LOcal
+where Type = 'CV'
+and (ToUpload = 1 or Deleted = 1)]]></db:sql>
+		</db:select>
+		<foreach doc:name="For Each" doc:id="fdc92895-8c60-4357-aeec-9337188a85fe" collection="payload" batchSize="200">
+			<ee:transform doc:name="Transform Message" doc:id="8c7fc4b3-7d09-41c8-81ea-db6a7ef24cad">
+				<ee:message>
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload map (varPayload) ->{
+  endDate: varPayload.End_Date as Date,
+  accountId: varPayload.AccountId,
+  integrationId: varPayload.Integration_Id,
+  name: varPayload.Contract_Name,
+  startDate: varPayload.Start_Date as Date
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="f24355da-ae16-4be7-9fa4-6b888d407fba" >
+				<try doc:name="Try" doc:id="5a2bdfd4-7408-4c56-a34f-fd94e1f5e2b6" >
+					<http:request method="PATCH" doc:name="Request" doc:id="2dda619f-8ae6-4118-aca6-5ff1aa3201de" config-ref="HTTP_Request_configuration" path="/service-contracts">
+			</http:request>
+				</try>
+			</until-successful>
+		</foreach>
+		<json-logger:logger doc:name="Logger1" doc:id="68ab83c3-edd3-4f68-aefb-e82509b748fc" config-ref="JSON_Logger_Config_variableBilling" message='#["After SQL Query Contracts"]'>
+			<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	</mule>

@@ -1,0 +1,18 @@
+#%RAML 1.0 
+title: Hello World Experience API
+version: v1
+baseUri: https://apiname.de-c1.cloudhub.io/api/v1
+protocols: HTTPS
+
+mediaType: application/json
+
+documentation: 
+  - !include documentation/api-doc.raml
+
+uses:
+  traits-lib: /exchange_modules/a7ecb5be-3332-4935-804c-d88cbfc670e2/common-traits-library/1.0.0/library.raml
+
+/ping:
+  get:
+    is: [traits-lib.healthCheck, traits-lib.client-id-required,traits-lib.traceable]
+

@@ -1,0 +1,20 @@
+#variable billing properties
+sqlconfig:
+  sqluser:      "![4PHFwmT569GcRKnIBo5ugg==]"
+  sqlpassword:  "![+d0u81kmXDrb2GhdRHAzzQ==]"
+  
+http.config:
+  clientid:     "![w3oWtHPobDz9TnimyhIdbLTVr6+4N8hbVsJ0OH49FctGQswonzManAGF0ftOlYV7]"
+  clientsecret: "![1t/+5gjIOr/LP6WArJEVTSzguChral5MQljHNwK3dgIg0/zEqRmNxlJ9deJH7SmZ]"
+  
+
+#invoice-portal-properties   
+
+salesforceconfig:
+  consumer:      "![pTH1m0vm5jtek+ZvLHAoHgM+qx7BEPt3uRpiKaYb7NWNSKTCUhGdoGgAqSD8Z38Mo8RFKLUn/XZ5tw/6e/N0qQotybV+2Tcik4agZyOosismSX0577k7RJOJPw/WWuMi]"
+  storePassword: "![w+EEiJWE2ZNDrP9z8t+3uA==]"
+  princable:     "![nyxAkVqEgFPZt5UtXSG9GaPmo2IjigxNY0YX42VNF/iD8HJDKwB2Qp+vdFKgPyWT]"
+    
+httpconfig:
+  clientId: "![e1lZb0ZF1vtRRkp4zcu7gw0hXjH1uM0C0taOubB/fNXhGnWTJdkXEPgfbWZPCPsF]"
+  clientSecret: "![7fD6yk6I87dbSiZDBZdUbntDGDC8TCSm1ligyH6MCMGJBVMQlySVcRXBeqtRMwwU]"

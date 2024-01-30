@@ -1,0 +1,24 @@
+#invoice portal properties
+invoicePortal:
+ application:
+  name:         "invoice-portal-batch" 
+  version:      "1.0.0"
+ http:
+  protocol: "HTTP"
+  host: "0.0.0.0"
+  port: "8081"
+ 
+
+#variable batch properties
+variableBilling:
+ application:
+  name:         "vardb-service-contract-batch" 
+  version:      "1.0.0"
+
+ http:
+  protocol: "HTTP"
+  host: "0.0.0.0"
+  port: "8081"
+ 
+ 
+ 

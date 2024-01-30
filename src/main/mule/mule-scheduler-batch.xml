@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+
+		<flow name="variable-billing-batch-scheduler" doc:id="5bd830e8-af07-4506-9d4b-9269dc62176f">
+		<scheduler doc:name="Scheduler" doc:id="489ff59a-57d1-4337-9171-44786e3d4106">
+			<scheduling-strategy>
+				<fixed-frequency frequency="60" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="variable-billing-batch-imp" doc:id="111a9d1b-0d59-432d-b1ba-7a3a54df9bab" name="variable-billing-batch-imp" />
+	</flow>
+	    <flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="api-config" />
+    
+</flow>
+	<flow name="invoice-transactions" doc:id="4e097f62-aee7-4ade-8bdb-dfee7a018686" >
+		<scheduler doc:name="Scheduler Transactions" doc:id="32deb03e-8911-4036-be25-bc6df476c2da" >
+			<scheduling-strategy >
+				
+				<fixed-frequency frequency="60" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-variable value="#[now()]" doc:name="Start Time" doc:id="a9d52a95-6e46-4d02-aeb1-6e4c0a23b233" variableName="startTime"/>
+		<json-logger:logger doc:name="Before Transactions" doc:id="4d501088-1c42-48b0-9c16-2a0ba28cf054" config-ref="JSON_Logger_Config_invoicePortal" message='#["Before Invoice Transaction Flow"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    Starttime:vars.startTime,
+    EndTime: ""
+    
+    }]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="invoice-header-import-flow" doc:id="2b773037-ab77-4923-ae80-ee02cc038c52" name="invoice-header-import-flow"/>
+		<json-logger:logger doc:name="After Transactions" doc:id="6c642ab0-0f55-4bf0-8157-1d30ee212e45" config-ref="JSON_Logger_Config_invoicePortal" message='#["After Invoice Transaction Flow"]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+        Starttime:vars.startTime,
+    	EndTime: now(),
+    	TotalElapsedTime: (now() - vars.startTime) as Number {unit: "seconds"}
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<flow name="invoice-documents" doc:id="2e73f3dc-e03d-4e8f-a723-634adf9966b0" >
+		<scheduler doc:name="Scheduler Documents" doc:id="bfc781ad-a739-4432-bee9-4e4384803a0a" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="30" timeUnit="MINUTES" startDelay="10"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-variable value="#[now()]" doc:name="Start Time" doc:id="995edd81-5b46-4447-91c2-5a27b4a03f2a" variableName="startTime" />
+		<json-logger:logger doc:name="Before Documents" doc:id="194c1f6c-2c07-4612-8b8a-ad8d367dfe73" config-ref="JSON_Logger_Config_invoicePortal" message='#["Before Invoice Document Flow"]'>
+			<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    Starttime:vars.startTime,
+    EndTime: ""
+    
+    }]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="invoice-document-import-flowPFE" doc:id="608421a3-06b4-4b39-bff9-3fd8f991d91d" name="invoice-document-import-flowPFE" />
+		<json-logger:logger doc:name="After Documents" doc:id="6198b3ee-5f3d-4616-855d-dd5cab9fe514" config-ref="JSON_Logger_Config_invoicePortal" message='#["After Invoice Document Flow"]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+        Starttime:vars.startTime,
+    	EndTime: now(),
+    	TotalElapsedTime: (now() - vars.startTime) as Number {unit: "seconds"}
+}]]]></json-logger:content>
+		</json-logger:logger>
+	
+</flow>
+	
+	</mule>

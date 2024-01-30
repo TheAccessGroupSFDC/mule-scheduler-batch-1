@@ -1,0 +1,36 @@
+#variable billing properties
+api:
+  id:           "12345678"
+  port:         "8092"
+  
+tls.keystore:
+  type:         "pkcs12"  
+  path:         "cert/prod.de-c1.cloudhub.io.p12"
+  alias:        ""
+
+accessGroup.alertnotification:
+  api:
+    host: "dev.api.accessGroup.net"
+
+
+#invoice-portal-properties   
+    
+http.config:
+  responseTimeout: "20000"
+  retryCount: "5"
+  host: " invoice-portal-sapi-2a5eys.a3fso7.gbr-e1.cloudhub.io"
+  errhosp: "error-hospital-sapi-2a5eys.internal-a3fso7.gbr-e1.cloudhub.io"
+  
+
+salesforceconfig:
+  keyStore:      "${mule.home}/apps/${app.name}/jks/prod/00D58000000Z4gm.jks"
+  certalias:     "mulesoft"
+  tokenEndpoint: "login"
+  reconFreq: "2000"
+  reconAtt: "3"
+  
+invoiceBatch:
+  limit: "2500"
+  totalRecordsDocs: "500"
+  totalRecordsInv: "10000"
+  

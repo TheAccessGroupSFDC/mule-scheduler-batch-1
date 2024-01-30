@@ -1,0 +1,13 @@
+#variable billing properties
+api:
+  id:           "12345678"
+  port:         "8092"
+  
+tls.keystore:
+  type:         "pkcs12"  
+  path:         "cert/dev.de-c1.cloudhub.io.p12"
+  alias:        ""
+
+accessGroup.alertnotification:
+  api:
+    host: "dev.api.accessGroup.net"
