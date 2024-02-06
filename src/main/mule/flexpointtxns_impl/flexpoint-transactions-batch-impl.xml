@@ -49,7 +49,7 @@ payload.errorItems.payload&#93;&#93;></ee:set-variable>
 		<choice doc:name="Check: Payload not Empty" doc:id="1b7998a3-1670-41b6-bd98-c00ce65dc949" >
 			<when expression="#[!isEmpty(payload)]" >
 				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="Set flexpointtxnsdbdata" doc:id="56486f2d-c38b-4312-9dac-f2c24b90050e" variableName="flexpointtxnsdbdata" />
-				<batch:job jobName="flexpoint-transactions-batch-implBatch_Job" doc:id="08647b84-587b-46c8-a629-4c105d708342" maxFailedRecords="-1" blockSize="150">
+				<batch:job jobName="flexpoint-transactions-batch-implBatch_Job" doc:id="08647b84-587b-46c8-a629-4c105d708342" maxFailedRecords="-1" blockSize="200">
 			<batch:process-records>
 				<batch:step name="SalesforceFlexpointTxns-Batch-Step" doc:id="70da0434-4cd3-4139-a324-2c50b14b9308">
 					<json-logger:logger doc:name="FlexTransaction Batch Process" doc:id="13f495a5-1708-440b-ae32-8920369fc1f2" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["FlexTransaction Batch Process"]'>
@@ -58,7 +58,7 @@ payload.errorItems.payload&#93;&#93;></ee:set-variable>
    
 }]]]></json-logger:content>
 					</json-logger:logger>
-							<batch:aggregator doc:name="Batch Aggregator" doc:id="ab255189-bc67-41ec-a59f-207c26204679" size="50">
+							<batch:aggregator doc:name="Batch Aggregator" doc:id="ab255189-bc67-41ec-a59f-207c26204679" size="100">
 								<flow-ref doc:name="flexpoint-transactions-sf-post-implSub_Flow" doc:id="29e82483-f1ca-497c-8925-fcdfb6fad2dd" name="flexpoint-transactions-sf-post-implSub_Flow" />
 								<ee:transform doc:name="SF Success and Error Details" doc:id="08aab858-327b-4da3-bcbd-2ccdaf62e862">
 					<ee:message>
