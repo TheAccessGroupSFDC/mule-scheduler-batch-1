@@ -173,7 +173,7 @@ errorList map ((item, index) -> {
 		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="d3d7d3f1-7682-4d18-9bfb-895d4fc69dca" >
 			<http:request method="POST" doc:name="POST /errors" doc:id="d3cdcbcc-4cd3-47a2-8921-9c46c225e74c" config-ref="HTTP_Request_Error_Hosptial" path="/errors" />
 		</until-successful>
-		<json-logger:logger doc:name="Flexpoint Transactions Errors are sent to Error Hosital API" doc:id="aafb807d-a6be-4ea4-a51b-da45f8f0649c" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#[Flexpoint Transactions Errors are sent to Error Hosital API]' >
+		<json-logger:logger doc:name="Flexpoint Transactions Errors are sent to Error Hosital API" doc:id="aafb807d-a6be-4ea4-a51b-da45f8f0649c" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["Flexpoint Transactions Errors are sent to Error Hosital API"]' >
 			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
 {
     
