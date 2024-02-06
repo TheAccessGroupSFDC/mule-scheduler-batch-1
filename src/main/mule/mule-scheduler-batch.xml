@@ -17,7 +17,15 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 		</scheduler>
 		<flow-ref doc:name="variable-billing-batch-imp" doc:id="111a9d1b-0d59-432d-b1ba-7a3a54df9bab" name="variable-billing-batch-imp" />
 	</flow>
-	    <flow name="api-main">
+	    <flow name="flexpointtransactions-scheduler-batchFlow" doc:id="73627b02-b075-4b56-a9bf-524188f45890" >
+		<scheduler doc:name="Flexpoint Transactions Scheduler" doc:id="445c84bc-cad0-47c7-a511-86c85b1b0969" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="flexpoint-transactions-batch-implFlow" doc:id="8377d652-8dbd-42ba-9342-455e5908f91b" name="flexpoint-transactions-batch-implFlow"/>
+	</flow>
+	<flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<!-- [STUDIO:"flexpoint-transactions-main-implSub_Flow"]<sub-flow name="flexpoint-transactions-main-implSub_Flow" doc:id="7b35338c-d557-4668-954b-11a9ef983744" >
+		<flow-ref doc:name="flexpoint-transactions-sqldb-fetch-implSub_Flow" doc:id="64e45054-fed9-4b30-a5b2-8b9a45a3a79f" name="flexpoint-transactions-sqldb-fetch-implSub_Flow"/>
+		<choice doc:name="Check: Payload not Empty" doc:id="f019b7a1-3751-4623-9b0f-d0cfb8c72bff">
+			<when expression="#[!isEmpty(payload)&#93;">
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;&#45;&#45;-&#10;payload&#93;" doc:name="Set flexpointtxnsdbdata" doc:id="4fb1453a-afb0-40b7-96f0-eeaf0fd69a59" variableName="flexpointtxnsdbdata" />
+				<flow-ref doc:name="flexpoint-transactions-sf-post-implSub_Flow" doc:id="29ca0d90-9d98-4d4c-8745-5ffe638120c6" name="flexpoint-transactions-sf-post-implSub_Flow"/>
+				<ee:transform doc:name="SF Success and Error Details" doc:id="599f1294-8e02-402f-8c62-9a79f874fcc7">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	fpprimaryids: (vars.flexpointtxnsdbdata filter ((item, index) -> !(payload.errorItems.payload.FlexPoints_Integration_ID__c contains item.FP_PRIMARY))).FP_PRIMARY default [&#93;,
+	"fpProcessed": 1
+}&#93;&#93;></ee:set-payload>
+							</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="sferrors"><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload.errorItems.payload&#93;&#93;></ee:set-variable>
+						</ee:variables>
+						</ee:transform>
+				
+				<choice doc:name="Check Flexpoint SF Success records are not Empty" doc:id="78e4bae7-5b25-470b-8a3e-0913b080af4f">
+					<when expression="#[!isEmpty(payload.fpprimaryids)&#93;">
+						<flow-ref doc:name="flexpoint-transactions-sqldb-patch-implSub_Flow" doc:id="a38a68a4-3c9e-4c25-b26b-95e4d91df9c2" name="flexpoint-transactions-sqldb-patch-implSub_Flow" />
+					</when>
+				</choice>
+				<choice doc:name="Check SF Flexpoint Errors are not Empty" doc:id="f1b96547-e337-4b31-a4eb-60cf6af8aa46">
+					<when expression="#[!isEmpty(vars.sferrors)&#93;">
+						<flow-ref doc:name="error-hospital-api-SubFlow" doc:id="f74ef82f-dc16-444d-a013-fa95cafe731b" name="error-hospital-api-SubFlow" doc:description="error-hospital-api-SubFlow" />
+					</when>
+				</choice>
+			</when>
+		</choice>
+	</sub-flow> [STUDIO] -->
+	<flow name="flexpoint-transactions-batch-implFlow" doc:id="ef701569-c1db-4f5f-8dd9-7e4d258dd8a2" >
+		<flow-ref doc:name="flexpoint-transactions-sqldb-fetch-implSub_Flow" doc:id="870d922f-de1d-40bb-b3f4-21b5f638e070" name="flexpoint-transactions-sqldb-fetch-implSub_Flow" />
+		<choice doc:name="Check: Payload not Empty" doc:id="1b7998a3-1670-41b6-bd98-c00ce65dc949" >
+			<when expression="#[!isEmpty(payload)]" >
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="Set flexpointtxnsdbdata" doc:id="56486f2d-c38b-4312-9dac-f2c24b90050e" variableName="flexpointtxnsdbdata" />
+				<batch:job jobName="flexpoint-transactions-batch-implBatch_Job" doc:id="08647b84-587b-46c8-a629-4c105d708342" maxFailedRecords="-1" blockSize="150">
+			<batch:process-records>
+				<batch:step name="SalesforceFlexpointTxns-Batch-Step" doc:id="70da0434-4cd3-4139-a324-2c50b14b9308">
+					<json-logger:logger doc:name="FlexTransaction Batch Process" doc:id="13f495a5-1708-440b-ae32-8920369fc1f2" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["FlexTransaction Batch Process"]'>
+						<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+					</json-logger:logger>
+							<batch:aggregator doc:name="Batch Aggregator" doc:id="ab255189-bc67-41ec-a59f-207c26204679" size="50">
+								<flow-ref doc:name="flexpoint-transactions-sf-post-implSub_Flow" doc:id="29e82483-f1ca-497c-8925-fcdfb6fad2dd" name="flexpoint-transactions-sf-post-implSub_Flow" />
+								<ee:transform doc:name="SF Success and Error Details" doc:id="08aab858-327b-4da3-bcbd-2ccdaf62e862">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="sferrors"><![CDATA[%dw 2.0
+output application/json
+---
+payload.errorItems.payload]]></ee:set-variable>
+										<ee:set-variable variableName="patchpayload" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	fpprimaryids: (vars.flexpointtxnsdbdata filter ((item, index) -> !(payload.errorItems.payload.FlexPoints_Integration_ID__c contains item.FP_PRIMARY))).FP_PRIMARY default [],
+	"fpProcessed": 1
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+								<choice doc:name="Check Flexpoint SF Success records are not Empty" doc:id="a17e43c3-d99e-4048-b634-0e5debfbdd32">
+									<when expression="#[!isEmpty(vars.patchpayload.fpprimaryids)]">
+										<flow-ref doc:name="flexpoint-transactions-sqldb-patch-implSub_Flow" doc:id="c4fc720f-322a-49b6-84d9-4d8fa2a8ee6e" name="flexpoint-transactions-sqldb-patch-implSub_Flow" />
+									</when>
+								</choice>
+								<choice doc:name="Check SF Flexpoint Errors are not Empty" doc:id="1b26b673-2dd9-4890-a2c1-7db23607895b" >
+									<when expression="#[!isEmpty(vars.sferrors)]" >
+										<flow-ref doc:name="error-hospital-api-SubFlow" doc:id="204ca37a-4e90-404e-b130-132c6cdd19f0" doc:description="error-hospital-api-SubFlow" name="error-hospital-api-SubFlow" />
+									</when>
+								</choice>
+							</batch:aggregator>
+				</batch:step>
+						<!-- <batch:step name="SqlDb-FlexpointTxns-Patch-Batch-Step" doc:id="8ef5b59a-51b7-4938-be96-ef7e1f4c70ea" acceptExpression="!isEmpty(payload.fpprimaryids)" acceptPolicy="ALL">
+							<batch:aggregator doc:name="Batch Aggregator" doc:id="696b890e-8656-4e50-bf2f-514b8d07d332" size="50">
+								<flow-ref doc:name="flexpoint-transactions-sqldb-patch-implSub_Flow" doc:id="afb5facf-76d5-483a-86f4-aa6e8b1b35b9" doc:description="error-hospital-api-SubFlow" name="flexpoint-transactions-sqldb-patch-implSub_Flow" />
+							</batch:aggregator>
+						</batch:step> -->
+			</batch:process-records>
+					<batch:on-complete >
+						<json-logger:logger doc:name="Exit" doc:id="dca4867e-0723-4be4-8828-e6953e8fc195" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["FlexTransaction Batch Process Exit"]'>
+									<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+								</json-logger:logger>
+					</batch:on-complete>
+		</batch:job>
+			</when>
+		</choice>
+	</flow>
+	<sub-flow name="flexpoint-transactions-sf-post-implSub_Flow" doc:id="90182964-e5c8-464f-8061-bfd0688937f8">
+		<json-logger:logger doc:name="Salesforce Flexpoint Transactions payload" doc:id="1600a146-26ae-424c-bb64-5e5f5df13878" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["Salesforce Flexpoint Transactions POST call"]'>
+								<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(vars.flexpointtxnsdbdata) 
+}]]]></json-logger:content>
+							</json-logger:logger>
+		<http:request method="POST" doc:name="Salesforce Flexpoint Transactions POST Call" doc:id="948be427-80d1-4a8c-867c-f7e3dae7e1f1" config-ref="Salesforce-ServiceContract-Sapi" path="/flexpointtranscations" doc:description="Salesforce Flexpoint Transactions POST Call" >
+			<http:body ><![CDATA[#[vars.flexpointtxnsdbdata]]]></http:body>
+		</http:request>
+		<json-logger:logger doc:name="Salesforce Flexpoint Transaction Post call" doc:id="41916d3a-fe90-4367-b7d3-23e625f67e8f" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["Flexpoint Transactions are Created in Salesforce"]'>
+										<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+									</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="flexpoint-transactions-sqldb-fetch-implSub_Flow" doc:id="d06929a2-fe2f-4649-892f-92402bbd4404" >
+		<json-logger:logger doc:name="Get FlexPoint transactions data from DB" doc:id="fdd00978-382c-48f8-80fc-dd44140247a5" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["Get FlexPoint Transactions data through SQL-DB-SAPI"]'>
+			<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<http:request method="GET" doc:name="Outbound : Flexpointtxn SQL DB SAPI call" doc:id="9ebe31a7-8625-4fef-92fb-147ff892257d" config-ref="SQL-DB-Sapi" path="/flexpoints">
+				<http:query-params><![CDATA[#[output application/java
+---
+{
+	isDeleted : 0,
+	fpProcessed : 0
+}]]]></http:query-params>
+		</http:request>
+		<json-logger:logger doc:name="FlexPoint Transactions are fetched from DB" doc:id="dabd11e8-e52c-4996-bf1a-a43c4fa5a941" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["FlexPoint Transactions data fetched through SQL-DB-SAPI"]'>
+			<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+   
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	<sub-flow name="error-hospital-api-SubFlow" doc:id="ec7c365a-9f4a-4d22-b88d-314f4a9ea31e" >
+		<json-logger:logger doc:name="Error Hosital payload" doc:id="5a0aacc3-f24d-4dc6-bca0-18ce99945de5" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["payload contains error hospital records"]'>
+										<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(vars.sferrors) 
+}]]]></json-logger:content>
+									</json-logger:logger>
+		<ee:transform doc:name="map errorHospital fields" doc:id="1caeb68e-a09f-4a35-b506-c3fd426473fe">
+										<ee:message>
+											<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var errorList = vars.sferrors
+---
+errorList map ((item, index) -> {
+  "errorDetails": "Received Account Flexpoint transactions from DB but not inserted in SF",
+  "dataFlow": "mule-scheduler-batch-1",
+  "errorText": "Can't Insert Flexpoint Transactions data in Salesforce",
+  "payload": write(item,"application/java"),
+  "sourceSystem": "Accounts db",
+  "status": "Retry",
+  "targetSystem": "SALESFORCE"
+})]]></ee:set-payload>
+										</ee:message>
+									</ee:transform>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="d3d7d3f1-7682-4d18-9bfb-895d4fc69dca" >
+			<http:request method="POST" doc:name="POST /errors" doc:id="d3cdcbcc-4cd3-47a2-8921-9c46c225e74c" config-ref="HTTP_Request_Error_Hosptial" path="/errors" />
+		</until-successful>
+		<json-logger:logger doc:name="Flexpoint Transactions Errors are sent to Error Hosital API" doc:id="aafb807d-a6be-4ea4-a51b-da45f8f0649c" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#[Flexpoint Transactions Errors are sent to Error Hosital API]' >
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+		</json-logger:logger>
+	
+</sub-flow>
+	<sub-flow name="flexpoint-transactions-sqldb-patch-implSub_Flow" doc:id="a48e7158-7ead-45b9-a983-5ff21acbaccc" >
+	<json-logger:logger doc:name="SQL DB SAPI Flexpoint Transactions patch payload" doc:id="56ad34b0-20fc-4869-a44e-18831c371e13" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["SQL DB SAPI Flexpoint Transactions patch payload"]'>
+								<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(vars.patchpayload) 
+}]]]></json-logger:content>
+							</json-logger:logger>
+				<http:request method="PATCH" doc:name="Outbound : Flexpointtxn SQL DB SAPI Patch call" doc:id="5248e442-7b44-4a8d-8485-d847d736cc44" config-ref="SQL-DB-Sapi" path="/flexpoints">
+			<http:body ><![CDATA[#[vars.patchpayload]]]></http:body>
+
+						</http:request>
+				<json-logger:logger doc:name="Flexpoint Transactions are Updated in DB" doc:id="15fd929c-4aea-4924-9a3c-4632b272c2fa" config-ref="JSON_Logger_Config_sfServiceContractSapi" message='#["Flexpoint Transactions are updated in DB"]'>
+										<json-logger:content><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    
+}]]]></json-logger:content>
+									</json-logger:logger>
+	</sub-flow>
+</mule>

@@ -65,8 +65,8 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 			</reconnection>
 		</http:request-connection>
 		<http:default-headers >
-			<http:default-header key="client_Id" value="${secure::httpconfig.clientId}" />
-			<http:default-header key="client_secret" value="${secure::httpconfig.clientSecret}" />
+			<http:default-header key="client_Id" value="${secure::flexhttpconfig.clientId}" />
+			<http:default-header key="client_secret" value="${secure::flexhttpconfig.clientSecret}" />
 		</http:default-headers>
 	</http:request-config>
 		<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="ae8b1cd1-1e6f-428d-b80e-ae6644ee5853" readTimeout="20">
@@ -93,5 +93,27 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
         <http:listener-connection host="0.0.0.0" port="${variableBilling.http.port}"/>
     </http:listener-config>
     <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-
+	<http:request-config name="SQL-DB-Sapi" doc:name="HTTP Request configuration" doc:id="61acb0b1-3b26-4cae-ad2b-49c4e6f6019b" basePath="/api" doc:description="SQL-DB-Sapi">
+		<http:request-connection host="${http.config.sqldbsapi}" port="443" protocol="HTTPS" connectionIdleTimeout="120000">
+			<reconnection >
+				<reconnect frequency="${http.config.responseTimeout}" count="${http.config.retryCount}" />
+			</reconnection>
+		</http:request-connection>
+		<http:default-headers >
+			<http:default-header key="client_id" value="${secure::flexhttpconfig.clientId}" />
+			<http:default-header key="client_secret" value="${secure::flexhttpconfig.clientSecret}" />
+		</http:default-headers>
+	</http:request-config>
+	<http:request-config name="Salesforce-ServiceContract-Sapi" doc:name="HTTP Request configuration" doc:id="f5b660f2-0571-417b-840a-8a05a2fd3f05" basePath="/api" doc:description="Salesfoce Service Contract Sapi">
+		<http:request-connection host="${http.config.sfservicecontractsapi}" port="443" protocol="HTTPS" connectionIdleTimeout="120000">
+			<reconnection >
+				<reconnect frequency="${http.config.responseTimeout}" count="${http.config.retryCount}" />
+			</reconnection>
+		</http:request-connection>
+		<http:default-headers >
+			<http:default-header key="client_id" value="${secure::flexhttpconfig.clientId}" />
+			<http:default-header key="client_secret" value="${secure::flexhttpconfig.clientSecret}" />
+		</http:default-headers>
+	</http:request-config>
+		<json-logger:config name="JSON_Logger_Config_sfServiceContractSapi" doc:name="JSON Logger Config" doc:id="69a59ef3-65cd-46e0-af2b-0e20541f2440" applicationName="${sfServiceContractSapi.application.name}" applicationVersion="${sfServiceContractSapi.application.version}" environment="${mule.env}" />
 </mule>

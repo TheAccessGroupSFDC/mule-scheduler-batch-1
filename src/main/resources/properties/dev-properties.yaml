@@ -30,7 +30,9 @@ http.config:
   responseTimeout: "20000"
   retryCount: "5"
   host: "invoice-portal-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
-  errhosp: "error-hospital-sapi-uat-k7qmu8.internal-pa977o.gbr-e1.cloudhub.io"
+  errhosp: "error-hospital-sapi-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
+  sfservicecontractsapi: "salesforce-service-contract-sapi-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
+  sqldbsapi: "sql-db-sapi-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
   
   
 salesforceconfig:
