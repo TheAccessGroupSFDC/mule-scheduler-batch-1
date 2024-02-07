@@ -19,3 +19,7 @@ salesforceconfig:
 httpconfig:
   clientId: "![2YR1Ah2Wwsa6fgZrosZhTZvY/tYLZ2eOs2rfW59ChbzwDy0Owe+eq6j09cELNxOp]"
   clientSecret: "![+3zhulGD/W3lzosR+8ywPo9HjgM+xRuZqCrol+Fy1YQBLP3m6kiHCtwzRdD5mg36]"
+  
+flexhttpconfig:
+  clientId: "![2jNqWaHJzMH69SQfCg8HlhqK2Y/hsqXyvgKsuOQ3NE3hjHDMstUvvZ9WUv53W19y]"
+  clientSecret: "![EWY9zLmBpR5lyEAqf5Id6woS1F3RBsj82JG9hg0jvUqnKy38a/Q1WgWE4m1JKuqS]"
