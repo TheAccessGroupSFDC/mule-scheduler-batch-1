@@ -13,22 +13,26 @@ tls.keystore:
   password:     "password"
   keyPassword:  "password"
   
+  
 sqlconfig:
   #host:         "sqlLive.access-accounts.com"
    host:         "10.48.214.139"
   
 httprequest:
-  host:         "salesforce-service-contract-papi-dev-qzg5c3.pa977o.gbr-e1.cloudhub.io"
+  host:         "service-contracts-papi-uat-k7qmu8.pa977o.gbr-e1.cloudhub.io"
   #host:         "service-contracts-papi-uat-k7qmu8.pa977o.gbr-e1.cloudhub.io"
   
   
 #invoice-portal-properties   
+
 
 http.config:
   responseTimeout: "20000"
   retryCount: "5"
   host: "invoice-portal-sapi-uat-k7qmu8.internal-pa977o.gbr-e1.cloudhub.io"
   errhosp: "error-hospital-sapi-uat-k7qmu8.internal-pa977o.gbr-e1.cloudhub.io"
+  sfservicecontractsapi: "salesforce-service-contract-sapi-uat-k7qmu8.pa977o.gbr-e1.cloudhub.io"
+  sqldbsapi: "sql-db-sapi-uat-k7qmu8.pa977o.gbr-e1.cloudhub.io"
   
   
 salesforceconfig:
