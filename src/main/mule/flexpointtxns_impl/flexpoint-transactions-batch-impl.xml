@@ -67,7 +67,7 @@ payload.errorItems.payload&#93;&#93;></ee:set-variable>
 						<ee:set-variable variableName="sferrors"><![CDATA[%dw 2.0
 output application/json
 ---
-payload.errorItems.payload]]></ee:set-variable>
+payload.errorItems]]></ee:set-variable>
 										<ee:set-variable variableName="patchpayload" ><![CDATA[%dw 2.0
 output application/json
 ---
@@ -160,10 +160,10 @@ output application/json
 var errorList = vars.sferrors
 ---
 errorList map ((item, index) -> {
-  "errorDetails": "Received Account Flexpoint transactions from DB but not inserted in SF",
+  "errorDetails": "Can't Insert Flexpoint Transactions data in Salesforce",
   "dataFlow": "mule-scheduler-batch-1",
-  "errorText": "Can't Insert Flexpoint Transactions data in Salesforce",
-  "payload": write(item,"application/java"),
+  "errorText": item.errorMessage,
+  "payload": write(item.payload,"application/java"),
   "sourceSystem": "Accounts db",
   "status": "Retry",
   "targetSystem": "SALESFORCE"
