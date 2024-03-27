@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="mule-sql-storedproc-batch-highpri-implSub_Flow" doc:id="a4995642-102d-4aa8-8e95-447104b30110" >
+	<scatter-gather doc:name="Scatter-Gather" doc:id="4a1f7447-daa6-413d-991a-9fad58ebfc98" >
+			<route>
+				<try doc:name="Try" doc:id="79d5cdf6-2134-44b9-8fc3-af317630f80f" >
+					<set-variable value="{call SalesForce.dbo.UDEF_RELOAD_SALES_TARGET_ACTUALS_FOR_SF()}" doc:name="Set Stored Procedure" doc:id="5c8ec633-d477-4834-8766-e6b36a785684" variableName="storedProcedure"/>
+					<flow-ref doc:name="sqlJob-batch-storedProcedure" doc:id="a42d7864-993f-4fb2-8d83-c83b4431e0ff" name="sqlJob-batch-storedProcedure"/>
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="432a0503-59f9-47d0-84bd-7ca53d483f02">
+							<ee:transform doc:name="Transform Message" doc:id="fc688f7d-e420-46ca-93a1-ac2bfab199bd">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"errorDetails": "SalesForce.dbo.UDEF_RELOAD_SALES_TARGET_ACTUALS_FOR_SF Stored Procedure call failed",
+	"dataFlow": "mule-sql-storedproc-batch",
+	"errorText": "SalesForce.dbo.UDEF_RELOAD_SALES_TARGET_ACTUALS_FOR_SF Stored Procedure call",
+	"payload": write(error.description,"application/java"),
+	"sourceSystem": "SQL",
+	"status": "Retry",
+	"targetSystem": "SQL"
+}]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<flow-ref doc:name="errorhospital-flow" doc:id="b6a430a6-b893-462a-8553-7793a3136ea9" name="errorhospital-flow" />
+						
+</on-error-continue>
+					
+</error-handler>
+				</try>
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="f0598ef2-5114-4110-9ad9-6b3a6d446187" >
+					<set-variable value="{call SalesForce.dbo.SFDC_Update_Campaigns_Upsert()}" doc:name="Set Stored Procedure" doc:id="d35b125d-66a7-43ea-b2ba-03906a6c02e8" variableName="storedProcedure" />
+					<flow-ref doc:name="sqlJob-batch-storedProcedure" doc:id="503c98ef-696f-4ac1-a728-79f57114709c" name="sqlJob-batch-storedProcedure" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5d70016b-4ee4-4331-8195-c18f4fed480d" >
+							<ee:transform doc:name="Transform Message" doc:id="06b9046b-53e6-48ec-8f43-652e81063d4d">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"errorDetails": "SalesForce.dbo.SFDC_Update_Campaigns_Upsert Stored Procedure call failed",
+	"dataFlow": "mule-sql-storedproc-batch",
+	"errorText": "SalesForce.dbo.SFDC_Update_Campaigns_Upsert Stored Procedure call",
+	"payload": write(error.description,"application/java"),
+	"sourceSystem": "SQL",
+	"status": "Retry",
+	"targetSystem": "SQL"
+}]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<flow-ref doc:name="errorhospital-flow" doc:id="a57e9753-5f84-4484-9180-3be1b6c2eac9" name="errorhospital-flow" />
+						
+</on-error-continue>
+					</error-handler>
+				</try>
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="1bf28471-57ad-45c0-b34e-cbb424311588" >
+					<set-variable value="{call SalesForce.dbo.SFDC_Update_Accounts_Upsert()}" doc:name="Set Stored Procedure" doc:id="ad099132-7863-4110-9e4a-9840ca8a2d72" variableName="storedProcedure" />
+					<flow-ref doc:name="sqlJob-batch-storedProcedure" doc:id="ebb786c5-8b16-43d9-b23f-d57957f05f26" name="sqlJob-batch-storedProcedure" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c9dc9fc4-7ade-4d14-bb82-5c869ed5638c" >
+							<ee:transform doc:name="Transform Message" doc:id="fd2cd8ec-dce3-4e50-94f2-7acf4d37d482">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"errorDetails": "SalesForce.dbo.SFDC_Update_Accounts_Upsert Stored Procedure call failed",
+	"dataFlow": "mule-sql-storedproc-batch",
+	"errorText": "SalesForce.dbo.SFDC_Update_Accounts_Upsert Stored Procedure call",
+	"payload": write(error.description,"application/java"),
+	"sourceSystem": "SQL",
+	"status": "Retry",
+	"targetSystem": "SQL"
+}]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<flow-ref doc:name="errorhospital-flow" doc:id="2204910f-fdb4-478a-b639-0c95a79c3326" name="errorhospital-flow" />
+						
+</on-error-continue>
+					</error-handler>
+				</try>
+			</route>
+		</scatter-gather>
+	
+	</sub-flow>
+	<sub-flow name="mule-sql-storedproc-lowpri-batch-implSub_Flow" doc:id="5da9cdd2-3ba9-4c31-9625-05c4f423930b" >
+	<scatter-gather doc:name="Scatter-Gather" doc:id="03febfba-5603-4179-a1b9-f9dbf3c16557" >
+			<route>
+				<try doc:name="Try" doc:id="84c23bba-8648-4b9b-9153-f5e5de426abb" >
+					<set-variable value="{call SalesForce.dbo.SFDC_Load_Upsert_Contracts()}" doc:name="Set Stored Procedure" doc:id="c0654e56-fd3c-45f4-a3a2-1117ef01346b" variableName="storedProcedure" />
+					<flow-ref doc:name="sqlJob-batch-storedProcedure" doc:id="f4bf8637-7121-4894-95bf-04897b5f17ec" name="sqlJob-batch-storedProcedure" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="58a0614b-7578-4c37-9d5d-78c1ab69dcc5" >
+							<ee:transform doc:name="Transform Message" doc:id="38b7b58a-bf56-44b9-b88d-9dc5bdebf83b">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"errorDetails": "SalesForce.dbo.SFDC_Load_Upsert_Contracts Stored Procedure call failed",
+	"dataFlow": "mule-sql-storedproc-batch",
+	"errorText": "SalesForce.dbo.SFDC_Load_Upsert_Contracts Stored Procedure call",
+	"payload": write(error.description,"application/java"),
+	"sourceSystem": "SQL",
+	"status": "Retry",
+	"targetSystem": "SQL"
+}]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<flow-ref doc:name="errorhospital-flow" doc:id="a1b01da2-5b58-4136-ac7a-c20ecd3a0c0d" name="errorhospital-flow" />
+						
+</on-error-continue>
+					</error-handler>
+				</try>
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="853f80ea-63a5-4b81-9e72-4d821b89c24b" >
+					<set-variable value="{call SalesForce.dbo.PoapDetailSalesforceProcedure()}" doc:name="Set Stored Procedure" doc:id="4baea5cc-02bd-4074-b44a-efaea1cef00a" variableName="storedProcedure" />
+					<flow-ref doc:name="sqlJob-batch-storedProcedure" doc:id="bc860359-3f40-4386-89fd-b822ed02dbe9" name="sqlJob-batch-storedProcedure" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b43faf24-b463-4f0a-bb08-6c019128d96d" >
+							<ee:transform doc:name="Transform Message" doc:id="f36e82a9-de99-42fd-bbea-bee5e643d292">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"errorDetails": "SalesForce.dbo.PoapDetailSalesforceProcedure Stored Procedure call failed",
+	"dataFlow": "mule-sql-storedproc-batch",
+	"errorText": "SalesForce.dbo.PoapDetailSalesforceProcedure Stored Procedure call",
+	"payload": write(error.description,"application/java"),
+	"sourceSystem": "SQL",
+	"status": "Retry",
+	"targetSystem": "SQL"
+}]]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<flow-ref doc:name="errorhospital-flow" doc:id="9d9c5650-a2e5-436b-bbf6-fe5df6df51b0" name="errorhospital-flow" />
+						
+</on-error-continue>
+					</error-handler>
+				</try>
+			</route>
+		</scatter-gather>
+	</sub-flow>
+	
+	<sub-flow name="errorhospital-flow" doc:id="588feee9-37fb-4345-9fc1-14f11846d2c9" >
+		<json-logger:logger doc:name="Before Error Hospital" doc:id="c3cc4839-b6b6-45e1-b75b-0578b0f0127a" message='#["Before Error Hospital Send " ++ vars.storedProcedure]' config-ref="JSON_Logger_Config_sqlStoredProc">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="eef7ac16-8cc7-4fd7-a9ac-daca87f23a28" >
+			<http:request method="POST" doc:name="Error Hospital Post" doc:id="6364c909-847c-4729-9631-c70a0893eae6" config-ref="HTTP_Request_Error_Hosptial" path="/errors" />
+		</until-successful>
+		<json-logger:logger doc:name="After Error Hospital" doc:id="7087d254-50dc-4e91-949a-cbbf219635da" message='#["After Error Hospital Send " ++ vars.storedProcedure]' tracePoint="END" config-ref="JSON_Logger_Config_sqlStoredProc">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+	
+	<sub-flow name="sqlJob-batch-storedProcedure" doc:id="2a9fb1b0-706d-42b5-a61a-091ff4ab7b34" >
+		<json-logger:logger doc:name="Before Stored Procedure Run" doc:id="ec280f76-2008-4b21-b456-e701bc72ef35" message='#["Before Stored Procedure Run " ++ vars.storedProcedure]' config-ref="JSON_Logger_Config_sqlStoredProc">
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<db:stored-procedure doc:name="Stored procedure" doc:id="2fc19b1b-031e-4d2f-9d04-9c0d7064121f" config-ref="SQL_Service_Salesforce">
+			<db:sql><![CDATA[#[vars.storedProcedure]]]></db:sql>
+		</db:stored-procedure>
+		<json-logger:logger doc:name="After Stored Procedure Run" doc:id="6e539288-b47f-4826-b53e-606bebd4cff1" config-ref="JSON_Logger_Config_sqlStoredProc" message='#["After Stored Procedure Run " ++ vars.storedProcedure]'>
+			<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+
+}]]]></json-logger:content>
+		</json-logger:logger>
+	</sub-flow>
+</mule>

@@ -1,0 +1,1 @@
+"{call SalesForce.dbo.SFDC_Load_Upsert_Contracts()}"

@@ -28,4 +28,13 @@ sfServiceContractSapi:
    protocol: "HTTP"
    host: "0.0.0.0"
    port: "8081"
+   
+sqlStoredProc:
+ application:
+   name:         "SQL StoredProcedures" 
+   version:      "1.0.0"
+ http:
+   protocol: "HTTP"
+   host: "0.0.0.0"
+   port: "8081"
  

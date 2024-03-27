@@ -90,5 +90,24 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 		</json-logger:logger>
 	
 </flow>
+
+<flow name="mule-sql-storedproc-lowpriority-batchFlow" doc:id="428c870d-73a3-4716-bc07-60ca184d7968" >
+		<scheduler doc:name="lowpriority Scheduler" doc:id="3a806ca9-bb14-4956-bb4c-6217d0c73f33" >
+			<scheduling-strategy >
+				<cron expression="${scheduler.lowpriority.cron}" />
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="mule-sql-storedproc-lowpri-batch-implSub_Flow" doc:id="96fae896-3ad6-43cb-b88b-c0ed624ee8e1" name="mule-sql-storedproc-lowpri-batch-implSub_Flow"/>
+		
+	</flow>
+	<flow name="mule-sql-storedproc-highpriority-batchFlow" doc:id="76910cf3-c03f-400f-9dce-83631b5a0b0d" >
+		<scheduler doc:name="highpriority Scheduler" doc:id="af4dc036-f670-4e6a-8c88-eada5326fef0" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="${scheduler.highpriority.frequency}" timeUnit="MINUTES" startDelay="${scheduler.highpriority.startdelay}"/>
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="mule-sql-storedproc-batch-highpri-implSub_Flow" doc:id="64039c2d-ddf3-40b9-9cf1-551c6cf51b75" name="mule-sql-storedproc-batch-highpri-implSub_Flow"/>
+		
+	</flow>
 	
 	</mule>

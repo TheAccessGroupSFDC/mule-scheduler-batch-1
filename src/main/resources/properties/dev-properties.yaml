@@ -46,3 +46,10 @@ invoiceBatch:
   limit: "2500"
   totalRecordsDocs: "500"
   totalRecordsInv: "10000"
+  
+scheduler:
+  lowpriority:
+    cron: "0 0 21 1/1 * ? *"
+  highpriority:
+    frequency: "30"
+    startdelay: "0"

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="mule-sql-storedproc-batch-suite.xml" />
+	<munit:test name="mule-sql-storedproc-lowpriority-batchFlow-test" doc:id="0aa3440c-e05f-4f48-b5e0-a12ccb095ba4" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock mule-sql-storedproc-lowpri-batch-implSub_Flow" doc:id="de1deaa7-dafc-47c8-bf25-50162ddd9398" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7e66a0ec-6c26-42c0-a708-733d9397dd60" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://mulesqlstoredproclowprioritybatchFlowtest\mock_payload.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="storedProcedure" value="#[readUrl('classpath://mulesqlstoredproclowprioritybatchFlowtest\mock_variable_.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="961f4c08-9e6b-472d-aa9f-716a96a6bea0" >
+				<munit:payload value="#[readUrl('classpath://mulesqlstoredproclowprioritybatchFlowtest\set-event_payload.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to mule-sql-storedproc-lowpriority-batchFlow" doc:id="d2e6e8ba-fcae-42b6-b12f-9c8a2ebde700" name="mule-sql-storedproc-lowpriority-batchFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="8640cb20-2239-45d4-920c-6829d62b4c8e" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import mulesqlstoredproclowprioritybatchFlowtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="mule-sql-storedproc-highpriority-batchFlow-test" doc:id="0e21a7cc-f25f-4a22-84c6-b15f6efd6e23" >
+		<munit:behavior >
+			<!-- [STUDIO:"Mock mule-sql-storedproc-batch-highpri-implSub_Flow"]<munit-tools:mock-when doc:name="Mock mule-sql-storedproc-batch-highpri-implSub_Flow" doc:id="fb655cd3-bf99-4eff-b46c-210d1cc10c0f" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8be6f08c-a769-4d86-b00d-bb0f1b520c87" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://mulesqlstoredprochighprioritybatchFlowtest\mock_payload1.dwl')&#93;" />
+					<munit-tools:variables >
+						<munit-tools:variable key="storedProcedure" value="#[readUrl('classpath://mulesqlstoredprochighprioritybatchFlowtest\mock_variable_1.dwl')&#93;" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when> [STUDIO] -->
+			<munit-tools:mock-when doc:name="Mock when" doc:id="2c19ec14-3190-437f-b1f9-a17a5b67b704" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="64039c2d-ddf3-40b9-9cf1-551c6cf51b75" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://mulesqlstoredprochighprioritybatchFlowtest\mock_payload1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="storedProcedure" value="#[readUrl('classpath://mulesqlstoredprochighprioritybatchFlowtest\mock_variable_1.dwl')]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="5ccb5cce-79ed-4ce1-aa54-8f53c9ead348" >
+				<munit:payload value="#[readUrl('classpath://mulesqlstoredprochighprioritybatchFlowtest\set-event_payload1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to mule-sql-storedproc-highpriority-batchFlow" doc:id="fb0b8507-724b-4005-85cc-948813eba2a4" name="mule-sql-storedproc-highpriority-batchFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="34e1ae11-86ed-4376-91e6-a165dc89f2b5" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import mulesqlstoredprochighprioritybatchFlowtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<!-- [STUDIO:"Assert that"]<munit-tools:assert-that doc:name="Assert that" doc:id="51dfbc39-8eb2-4585-b6ec-47da2395df56" expression="#[payload&#93;" is="#[MunitTools::notNullValue()&#93;"/> [STUDIO] -->
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
